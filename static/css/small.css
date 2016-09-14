@@ -1,0 +1,32 @@
+@charset "utf-8";
+/* CSS Document */
+body{margin:0; padding:0px;font-size:1.5em; text-align:center;background:#e3e5e8; }
+.clear{clear:both;width:100%;height:0;font-size:0px;line-height:0; overflow:hidden; margin:0; padding:0;}
+.main{width:480px; margin:0 auto;}
+.logo{background:#000; width:480px; height:165px; background:#fff url(../images/480/logo.png) no-repeat center 0;}
+a{color:#fff; text-decoration:none;}
+.box_top{width:480px; height:170px; padding:10px 0;}
+.box_left_a{float:left; width:230px; height:170px; background:#fd8e4a url(../images/480/img01.png) no-repeat 0 center; margin:0 10px 0 10px; text-align:left;}
+.box_left_a a{display:block;width:205px; height:144px; color:#fff; padding:25px 0 0 25px;}
+.box_righ_a{float:left; width:220px; height:169px; margin:0 0 0 0}
+.box_righ_a_top{ width:220px; height:80px;margin-bottom:10px;background:#f2ba34 url(../images/480/img02.png) no-repeat center 10px;}
+.box_righ_a_top a{display:block;width:220px; height:36px;color:#fff; text-align:center; padding:50px 0 0 0; }
+.box_right_a_l{ float:left; width:105px; height:80px;background:#f0563c url(../images/480/img03.png) no-repeat center 10px; margin-right:10px;}
+.box_right_a_r{ float:left; width:105px; height:80px;background:#ed585c url(../images/480/img04.png) no-repeat center 15px;}
+.box_right_a_l a,.box_right_a_r a{display:block;width:105px; height:36px;padding:50px 0 0 0;}
+
+.box_mid{width:480px;height:110px;}
+.box_left_b{float:left;width:230px; height:110px; background:#f8888b url(../images/480/img05.png) no-repeat center 30px; margin:0 10px 0 10px;}
+.box_left_b a{display:block;width:230px; height:40px; padding:70px 0 0 0 ;}
+
+.box_right_b{float:left;width:220px; height:110px; background:#fbbe7c url(../images/480/img06.png) no-repeat center 25px; margin:0 10px 0 0;}
+.box_right_b a{display:block;width:220px; height:40px; padding:70px 0 0 0 ;}
+
+.box_c{float:left;width:110px; height:130px; background:#652b2f url(../images/480/img07.png) no-repeat center 30px; margin:0 10px 0 10px;}
+.box_c a,.box_d a,.box_e a{display:block;width:110px; height:60px; padding:70px 0 0 0 ;}
+.box_d{float:left;width:110px; height:130px; background:#2abc08 url(../images/480/img08.png) no-repeat center 30px; margin:0 10px 0 0;}
+.box_e{float:left;width:105px; height:130px; background:#fd8e4a url(../images/480/img09.png) no-repeat center 25px;}
+.box_f{float:left;width:105px; height:130px; background:none; padding:0 0 0 10px;}
+.about_top a{display:block;width:105px; height:20px; padding:40px 0 0 0 ;background:#fd8e4a url(../images/480/img10.png) no-repeat center 10px; font-size:0.6em;}
+.help_bottom a{display:block;width:105px; height:20px; padding:40px 0 0 0 ;background:#c4674e url(../images/480/img11.png) no-repeat center 10px;margin:10px 10px 0 0;font-size:0.6em;}
+.box_footer{width:480px;height:130px; padding:10px 0;}

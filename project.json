@@ -1,0 +1,23 @@
+{
+    "project_type": "javascript",
+
+    "debugMode" : 1,
+    "noCache": true,
+    "showFPS" : 0,
+    "frameRate" : 60,
+    "id" : "gameCanvas",
+    "renderMode" : 1,
+    "engineDir":"frameworks/cocos2d-html5",
+
+    "modules" : ["cocos2d"],
+
+    "jsList" : [
+        "src/resource.js",
+        "src/app.js",
+
+        "src/Game/GameScene.js",
+        "src/Game/G_BackGroundLayer.js",
+        "src/Game/G_ThouchLayer.js"
+
+    ]
+}

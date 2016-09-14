@@ -1,0 +1,7 @@
+@charset "utf-8";
+/* CSS Document */
+.shop_txt{ color:#666; line-height:1.4em; font-size:0.9em; margin:12px; letter-spacing:1px;}
+.shop_txt_2{ float:left; width:296px; color:#8c8e8f; line-height:1.4em; font-size:0.9em; margin:0px 12px 12px 12px; letter-spacing:1px;text-align:justify; text-justify:inter-ideograph;}
+.pages{ color:#000; text-align:right; padding-right:10px; padding-left:10px;}
+.pages a{ color:blue;}
+
