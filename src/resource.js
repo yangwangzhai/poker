@@ -9,6 +9,8 @@ var res = {
     s_bet100:"res/btn_100.png",
     s_chips:"res/chips.png",
     s_btn_start:"res/btn_start.png",
+    s_bg_poker:"res/bg_poker.png",
+    s_poker_k:"res/poker_k.png",
 
     s_bg_music : "res/audio/bg_music.mp3",
     s_yao : "res/audio/yao1.mp3"
