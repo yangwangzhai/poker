@@ -58,6 +58,67 @@ class poker extends CI_Controller
 		$this->load->view('poker',$data);
 	}
 
+
+    /**
+     *  A : 黑桃
+     *  B ：红心
+     *  C ：梅花
+     *  D ：方块
+     */
+    public function main(){
+        if($this->checkGameKey()){  //验证用户身份
+            $openid = trim($_POST['openid']);
+            //验证烟豆是否够下注
+            $my_YD = $this->getYD($openid);
+            $sum = intval($_POST['bet_num']);
+            if($my_YD < $sum){  //判断龙币是否够下注
+                $result = array('Code'=>-2,'Msg'=>'龙币不足');
+                $this->addErrorLog(-2,'龙币不足');//添加记录到数据库
+                echo json_encode($result);
+                exit();
+            }else{
+                //控制扑克牌的生成
+                $arr_hs = array(4=>"A",3=>"B",2=>"C",1=>"D");
+                $arr_p_1 = array(4,3,2,1);  //玩家花色
+                $arr_p_2 = array(1,2,3,4,5,6,7,8,9,10,11,12,13);//玩家点数
+                $arr_b_1 = array(4,4,3,3,2,1);//庄家花色
+                $arr_b_2 = array(1,2,3,4,5,6,6,7,7,7,8,8,8,9,9,9,10,10,10,11,11,12,12,13,13);//庄家点数
+                $p_1 = $this->arr_rand($arr_p_1);
+                $p_2 = $this->arr_rand($arr_p_2);
+                $b_1 = $this->arr_rand($arr_b_1);
+                $b_2 = $this->arr_rand($arr_b_2);
+                //先判断玩家和庄家随机抽取的牌是否相同，相同则重新抽取
+                if($b_2==$p_2&&$b_1==$p_1){
+                    if($b_2==13){
+                        $p_2 = ($p_2-1)%13;
+                    }else{
+                        $b_2 = ($b_2+1)%13;
+                    }
+                    $winner = "baker";
+                }else{
+                    if($b_2>$p_2){
+                        $winner = "baker";
+                    }elseif($b_2==$p_2){
+                        if($b_1>$p_1){
+                            $winner = "baker";
+                        }else{
+                            $winner = "player";
+                        }
+                    }else{
+                        $winner = "player";
+                    }
+                }
+                $p_1 = $arr_hs[$p_1];
+                $b_1 = $arr_hs[$b_1];
+                $result = array('Code'=>0,'Msg'=>'成功','p_1'=>$p_1,'p_2'=>$p_2,'b_1'=>$b_1,'b_2'=>$b_2,'winner'=>$winner,'bets'=>$sum);
+            }
+        }else{
+            $result = array('Code'=>-1,'Msg'=>'数据异常');
+            $this->addErrorLog(-1,'Gamekey不正确');//添加记录
+        }
+        echo json_encode($result);
+    }
+
 	/*
 	*下注
 	*Code : 0 成功， -1 gamekey验证失败， -2 烟豆不足 -3 其他
@@ -391,6 +452,12 @@ class poker extends CI_Controller
 
 
    	}
+
+    //从数组中随机获取一个数
+    private function arr_rand($arr){
+        $rand_keys = array_rand($arr);
+        return $arr[$rand_keys];
+    }
 
    	function get_rand($proArr) {
         $result = '';

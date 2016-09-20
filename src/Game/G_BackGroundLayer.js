@@ -73,7 +73,7 @@ var G_BackGroundLayer = cc.Layer.extend({
         this.addChild(this._NickName_label);
 
         //我的烟豆
-        this._mybean = new cc.LabelTTF('我的烟豆：'+wx_info.total_gold,'Arial',14);
+        this._mybean = new cc.LabelTTF('我的龙币：'+wx_info.total_gold,'Arial',14);
         this._mybean.attr({
             anchorX : 0,
             anchorY : 0.5
@@ -81,7 +81,7 @@ var G_BackGroundLayer = cc.Layer.extend({
         this._mybean.setPosition(70,31);
         this.addChild(this._mybean);
         //总共赚取烟豆
-        this._mywinbean = new cc.LabelTTF('赚取'+this.my_win_bean+'烟豆','Arial',14);
+        this._mywinbean = new cc.LabelTTF('本次赚取：'+this.my_win_bean,'Arial',14);
         this._mywinbean.attr({
             anchorX : 0,
             anchorY : 0.5

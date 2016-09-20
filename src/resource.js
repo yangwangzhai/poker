@@ -14,6 +14,8 @@ var res = {
     s_poker_a:"res/poker_a.png",
     s_btn_show:"res/btn_show.png",
     s_btn_ready:"res/btn_ready.png",
+    s_card_plist:"res/card_plist.plist",
+    s_card_png:"res/card_plist.png",
 
     s_bg_music : "res/audio/bg_music.mp3",
     s_yao : "res/audio/yao1.mp3"
