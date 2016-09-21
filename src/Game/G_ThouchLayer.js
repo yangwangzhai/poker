@@ -7,7 +7,7 @@ var G_ThouchLayer = cc.Layer.extend({
     curr_selected_OBJ: null,//当前选中的押号按钮
     curr_bet_obj: null,//当前选中的下注按钮
     bet_on_obj: null,   //存放押注对象
-    my_YD: null,//我的烟豆
+    my_YD: null,//我的烟豆(与数据库同步)
     UI_YD: null,//UI显示的烟豆数
     ZQ_YD: 0,
     show_xz: null,    //游戏底部下注数组
@@ -122,8 +122,8 @@ var G_ThouchLayer = cc.Layer.extend({
             this._start_menu.setVisible(true);
             this.bet_on_obj.total += sender.bet_num;    //累加每次投注的值
             this.show_xz.setString(this.bet_on_obj.total); //设置文本框中的文本
-            this.my_YD -= sender.bet_num;
-            BG_Object._mybean.setString('我的烟豆：'+this.my_YD); //设置文本框中的文本
+            this.UI_YD -= sender.bet_num;
+            BG_Object._mybean.setString('我的龙币：'+this.UI_YD); //设置文本框中的文本
         }else{
             alert('龙币不足！');
         }
@@ -143,7 +143,6 @@ var G_ThouchLayer = cc.Layer.extend({
     //总的押注数值
     initXzArea:function(){
         var fontColor = new cc.Color(255, 255, 0);  //实列化颜色对象
-        cc.log(this.bet_on_obj.total);
         this.show_xz = new cc.LabelTTF('0', 'Arial', 20);
         this.show_xz.attr({
             x: (this.WinSize.width)/2,
@@ -193,6 +192,7 @@ var G_ThouchLayer = cc.Layer.extend({
         this._s_show_down_menu.setVisible(false);
         //上一盘的下注值清零
         this.bet_on_obj.total = 0;
+        BG_Object._mywinbean.setString('本次赚取：' + 0);
     },
 
     //“摊牌”
@@ -213,7 +213,6 @@ var G_ThouchLayer = cc.Layer.extend({
     beginCallback:function(){
         var self=this;
         cc.spriteFrameCache.addSpriteFrames(res.s_card_plist);
-
         //异步
         var xhr = cc.loader.getXMLHttpRequest();
         xhr.open("POST", "index.php?c=poker&m=main");
@@ -239,7 +238,6 @@ var G_ThouchLayer = cc.Layer.extend({
                         var sequence = cc.sequence(action1,callback);
                         self.poker_value.runAction(sequence);
                         self.s_show_downArea.setVisible(true);
-
                         //玩家翻牌
                         self.scheduleOnce(function(){
                             var p1 = self.player_num.p_1;
@@ -316,7 +314,8 @@ var G_ThouchLayer = cc.Layer.extend({
 
     playerAdd:function(node){
         this.show_xz.setString(this.bet_on_obj.total+this.player_num.bets); //设置文本框中的文本
-        this.my_YD += this.bet_on_obj.total+this.player_num.bets;   //更新我的龙币值
+        this.my_YD = this.player_num.My_YD;   //更新我的龙币值
+        this.UI_YD = this.player_num.My_YD;   //更新我的龙币值
         BG_Object._mybean.setString('我的龙币：' + this.my_YD);  //显示最新的龙币值
         BG_Object._mywinbean.setString('本次赚取：' + this.bet_on_obj.total);//显示本次赚取的龙币
     },
@@ -349,6 +348,9 @@ var G_ThouchLayer = cc.Layer.extend({
     bakerFadeOut:function(){
         this.s_chipsArea.setVisible(false);
         this.show_xz.setVisible(false);
+        this.my_YD = this.player_num.My_YD;   //更新我的龙币值
+        this.UI_YD = this.player_num.My_YD;   //更新我的龙币值
+        BG_Object._mybean.setString('我的龙币：' + this.my_YD);  //显示最新的龙币值
         BG_Object._mywinbean.setString('本次赚取：-' + this.bet_on_obj.total);
     },
 

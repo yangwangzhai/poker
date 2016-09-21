@@ -66,57 +66,111 @@ class poker extends CI_Controller
      *  D ：方块
      */
     public function main(){
-        if($this->checkGameKey()){  //验证用户身份
+        if(1){  //验证用户身份$this->checkGameKey()
             $openid = trim($_POST['openid']);
             //验证烟豆是否够下注
             $my_YD = $this->getYD($openid);
             $sum = intval($_POST['bet_num']);
-            if($my_YD < $sum){  //判断龙币是否够下注
+            if(0){  //判断龙币是否够下注$my_YD<$sum || $sum<0
                 $result = array('Code'=>-2,'Msg'=>'龙币不足');
                 $this->addErrorLog(-2,'龙币不足');//添加记录到数据库
                 echo json_encode($result);
                 exit();
             }else{
                 //控制扑克牌的生成
-                $arr_hs = array(4=>"A",3=>"B",2=>"C",1=>"D");
-                $arr_p_1 = array(4,3,2,1);  //玩家花色
-                $arr_p_2 = array(1,2,3,4,5,6,7,8,9,10,11,12,13);//玩家点数
-                $arr_b_1 = array(4,4,3,3,2,1);//庄家花色
-                $arr_b_2 = array(1,2,3,4,5,6,6,7,7,7,8,8,8,9,9,9,10,10,10,11,11,12,12,13,13);//庄家点数
-                $p_1 = $this->arr_rand($arr_p_1);
-                $p_2 = $this->arr_rand($arr_p_2);
-                $b_1 = $this->arr_rand($arr_b_1);
-                $b_2 = $this->arr_rand($arr_b_2);
-                //先判断玩家和庄家随机抽取的牌是否相同，相同则重新抽取
-                if($b_2==$p_2&&$b_1==$p_1){
-                    if($b_2==13){
-                        $p_2 = ($p_2-1)%13;
-                    }else{
-                        $b_2 = ($b_2+1)%13;
-                    }
-                    $winner = "baker";
-                }else{
-                    if($b_2>$p_2){
-                        $winner = "baker";
-                    }elseif($b_2==$p_2){
-                        if($b_1>$p_1){
-                            $winner = "baker";
-                        }else{
-                            $winner = "player";
-                        }
-                    }else{
-                        $winner = "player";
+                $arr_all = array();
+                $arr_hs = array(1=>"D",2=>"C",3=>"B",4=>"A");
+                $arr_1 = array(1,2,3,4);  //花色
+                $arr_2 = array(1,2,3,4,5,6,7,8,9,10,11,12,13);//点数
+                foreach($arr_2 as $value){
+                    foreach($arr_1 as $val){
+                        $arr_all[] = $value.$val;  //扑克牌全部点数（包括花色）
                     }
                 }
+                //$p_key = array_rand($arr_all);
+                $p_key = 45;
+                echo "<pre>";
+                print_r($arr_all);
+                echo "<pre/>";
+                echo $p_key;
+                if($p_key==count($arr_all)-1){
+                    //玩家抽到的是最大的牌
+                    echo "玩家抽到的是最大的牌";exit;
+                }elseif($p_key==0){
+                    //玩家抽到的是最小的牌
+                    echo "玩家抽到的是最小的牌";exit;
+                }else{
+                    $this->getProbability($arr_all,$sum,$p_key);
+                }
+
+                exit;
+
                 $p_1 = $arr_hs[$p_1];
                 $b_1 = $arr_hs[$b_1];
-                $result = array('Code'=>0,'Msg'=>'成功','p_1'=>$p_1,'p_2'=>$p_2,'b_1'=>$b_1,'b_2'=>$b_2,'winner'=>$winner,'bets'=>$sum);
+
+                //增加或者扣除龙币
+
+                if($winner=="baker"){
+                    $My_YD = $this->subYD($openid,abs($sum)); //庄家赢，扣除龙币
+                }else{
+                    $My_YD = $this->addYD($openid,abs($sum)); //闲家赢，增加龙币
+                }
+
+                //下注信息写入数据库
+                $BetOndata['Openid'] = $openid;
+                $BetOndata['bet'] = $sum;
+                if($winner=="baker"){
+                    $BetOndata['Result'] = -$sum;
+                }else{
+                    $BetOndata['Result'] = $sum;
+                }
+                $BetOndata['AddTime'] = time();
+                $this->db->insert('zy_bet_on',$BetOndata);
+
+                $result = array('Code'=>0,'Msg'=>'成功','p_1'=>$p_1,'p_2'=>$p_2,'b_1'=>$b_1,'b_2'=>$b_2,'winner'=>$winner,'bets'=>$sum,'My_YD'=>$My_YD);
             }
         }else{
             $result = array('Code'=>-1,'Msg'=>'数据异常');
             $this->addErrorLog(-1,'Gamekey不正确');//添加记录
         }
         echo json_encode($result);
+    }
+
+    private function getProbability($arr_all,$sum,$key){
+        $count = count($arr_all)-1;
+        $b_arr = array_slice($arr_all, $key+1,$count,true);
+        echo "<pre>";
+        print_r($b_arr);
+        echo "<pre/>";
+        $p_arr = array_slice($arr_all, 0,$key-1);
+
+        if($sum<=20){
+            //下注<=20，庄家赢概率65%。生成一个数组，其中有13个是庄家赢的点数，7个是玩家赢的
+            if(count($b_arr)>=13){    //从$b_arr中随机抽取13张牌
+                $rand_keys = array_rand($b_arr, 13);
+            }else{
+                $bb = $this->arr_copy($b_arr,13);
+                echo "<pre>";
+                print_r($bb);
+                echo "<pre/>";
+                exit;
+            }
+        }
+    }
+
+    private function arr_copy($arr,$num){
+        $temp = array();
+        $max = ceil($num/count($arr));
+        for($i=0;$i<$max;$i++){
+            foreach($arr as $key=>$value){
+                if(count($temp)==$num){
+                    break;
+                }else{
+                    $temp[] = $value;
+                }
+            }
+        }
+        return $temp;
     }
 
 	/*
@@ -147,8 +201,6 @@ class poker extends CI_Controller
 			foreach($betdata as $v){
 				$sum += $v;
 			}
-
-
 			if($my_YD < $sum){
 				$result = array('Code'=>-2,'Msg'=>'烟豆不足');
                 $this->addErrorLog(-2,'烟豆不足');//添加记录到数据库
@@ -156,9 +208,8 @@ class poker extends CI_Controller
                 exit();
 			}
 
-			//$count = $this->getCount();//随机生成点数
-
-			$count = $this->getCountByProbability($betdata);//控制概率生成点数
+            //控制概率生成点数
+			$count = $this->getCountByProbability($betdata);
 
 			//结算
 			$jiesuan = array();
@@ -228,15 +279,6 @@ class poker extends CI_Controller
 
 
 		echo json_encode($result);
-	}
-
-	//随机获取骰子点数
-	private function getCount(){
-
-		$rand = mt_rand(1, 6);
-
-		return $rand;
-
 	}
 
 	//根据概率获取点数,待完善
@@ -371,34 +413,28 @@ class poker extends CI_Controller
         if(!$openid){
             return false;
         }
-
         $Pdata = $this->db->get_where('zy_player',array('Openid'=>$openid))->row_array();
-
         return $Pdata['TotalGold'];
     }
 
 	//添加烟豆
     private function addYD($openid,$num){
-    	if(!is_numeric($num) || $sum < 0){
+    	if(!is_numeric($num) || $num < 0){
     		return false;
     	}
-
     	$this->db->set('TotalGold', 'TotalGold+'.$num, FALSE);
     	$this->db->update('zy_player',array('Openid'=>$openid));
-
     	return $this->getYD($openid);
-
     }
 
     //扣除烟豆
 	private function subYD($openid,$num){
-		if(!is_numeric($num) || $sum < 0){
+        //判断下注值是否为数字或者是否<0
+		if(!is_numeric($num) || $num < 0){
 			return false;
 		}
-
 		$this->db->set('TotalGold', 'TotalGold-'.$num, FALSE);
 		$this->db->update('zy_player',array('Openid'=>$openid));
-
 		return $this->getYD($openid);
 	}
 
