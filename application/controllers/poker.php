@@ -66,12 +66,12 @@ class poker extends CI_Controller
      *  D ：方块
      */
     public function main(){
-        if(1){  //验证用户身份$this->checkGameKey()
+        if($this->checkGameKey()){  //验证用户身份
             $openid = trim($_POST['openid']);
             //验证烟豆是否够下注
             $my_YD = $this->getYD($openid);
             $sum = intval($_POST['bet_num']);
-            if(0){  //判断龙币是否够下注$my_YD<$sum || $sum<0
+            if($my_YD<$sum || $sum<0){  //判断龙币是否够下注
                 $result = array('Code'=>-2,'Msg'=>'龙币不足');
                 $this->addErrorLog(-2,'龙币不足');//添加记录到数据库
                 echo json_encode($result);
@@ -87,12 +87,13 @@ class poker extends CI_Controller
                         $arr_all[] = $value.$val;  //扑克牌全部点数（包括花色）
                     }
                 }
-                //$p_key = array_rand($arr_all);
-                $p_key = 45;
-                echo "<pre>";
+                $p_key = array_rand($arr_all);
+                //$p_key = 45;
+                //echo "<br>";
+                /*echo "<pre>";
                 print_r($arr_all);
-                echo "<pre/>";
-                echo $p_key;
+                echo "<pre/>";*/
+                //echo $p_key;
                 if($p_key==count($arr_all)-1){
                     //玩家抽到的是最大的牌
                     echo "玩家抽到的是最大的牌";exit;
@@ -100,16 +101,26 @@ class poker extends CI_Controller
                     //玩家抽到的是最小的牌
                     echo "玩家抽到的是最小的牌";exit;
                 }else{
-                    $this->getProbability($arr_all,$sum,$p_key);
+                    $b_key = $this->getProbability($arr_all,$sum,$p_key);
                 }
 
-                exit;
+                $p = $arr_all[$p_key];
+                //echo "玩家的值：".$p;echo "<br>";
+                $p_1 = $arr_hs[$p%10];
+                $p_2 = intval($p/10);
+                //echo "<br>";echo $p_1."||".$p_2;echo "<br>";
+                $b = $arr_all[$b_key];
+                //echo "庄家的值：".$b;echo "<br>";
+                $b_1 = $arr_hs[$b%10];
+                $b_2 = intval($b/10);
+                //echo $b_1."||".$b_2;echo "<br>";
 
-                $p_1 = $arr_hs[$p_1];
-                $b_1 = $arr_hs[$b_1];
-
+                if($b_key>$p_key){
+                    $winner = "baker";
+                }else{
+                    $winner = "player";
+                }
                 //增加或者扣除龙币
-
                 if($winner=="baker"){
                     $My_YD = $this->subYD($openid,abs($sum)); //庄家赢，扣除龙币
                 }else{
@@ -139,23 +150,56 @@ class poker extends CI_Controller
     private function getProbability($arr_all,$sum,$key){
         $count = count($arr_all)-1;
         $b_arr = array_slice($arr_all, $key+1,$count,true);
-        echo "<pre>";
+        /*echo "<pre>";
         print_r($b_arr);
-        echo "<pre/>";
-        $p_arr = array_slice($arr_all, 0,$key-1);
-
+        echo "<pre/>";*/
+        $p_arr = array_slice($arr_all, 0,$key);
+        /*echo "<pre>";
+        print_r($p_arr);
+        echo "<pre/>";*/
         if($sum<=20){
-            //下注<=20，庄家赢概率65%。生成一个数组，其中有13个是庄家赢的点数，7个是玩家赢的
-            if(count($b_arr)>=13){    //从$b_arr中随机抽取13张牌
-                $rand_keys = array_rand($b_arr, 13);
-            }else{
-                $bb = $this->arr_copy($b_arr,13);
-                echo "<pre>";
-                print_r($bb);
-                echo "<pre/>";
-                exit;
-            }
+            //当下注值小于等于20时，庄家中奖概率为55%
+            $b_rate = 11;
+            $p_rate = 9;
+        }elseif($sum>20&&$sum<=50){
+            //当下注值大于20且小于等于50时，庄家中奖概率为60%
+            $b_rate = 3;
+            $p_rate = 2;
+        }elseif($sum>50&&$sum<=100){
+            //当下注值大于50且小于等于100时，庄家中奖概率为62%
+            $b_rate = 31;
+            $p_rate = 19;
+        }elseif($sum>100){
+            //当下注值大于100时，庄家中奖概率为65%
+            $b_rate = 13;
+            $p_rate = 7;
         }
+        //下注值<=20，庄家赢概率65%。生成一个数组，其中有13个是庄家赢的点数，7个是玩家赢的
+        if(count($b_arr)>=$b_rate){    //从$b_arr中随机抽取13张牌
+            $rand_keys_b = array_rand($b_arr, $b_rate);
+        }else{
+            $rand_keys_b = $this->arr_copy($b_arr,$b_rate);
+        }
+        if(count($p_arr)>=$p_rate){    //从$b_arr中随机抽取13张牌
+            $rand_keys_p = array_rand($p_arr, $p_rate);
+        }else{
+            $rand_keys_p = $this->arr_copy($p_arr,$p_rate);
+        }
+        //合并数组
+        $arr_final = array_merge($rand_keys_b,$rand_keys_p);
+        /*echo "<pre>";
+        print_r($rand_keys_b);
+        echo "<pre/>";
+        echo "<pre>";
+        print_r($rand_keys_p);
+        echo "<pre/>";
+        echo "<pre>";
+        print_r($arr_final);
+        echo "<pre/>";*/
+        //从合并数组中随机获取一个值，此值为庄家的牌数
+        $key_final = $this->arr_rand($arr_final);
+        //echo "庄家随机数：".$key_final;echo "<br>";
+        return $key_final;
     }
 
     private function arr_copy($arr,$num){
@@ -166,7 +210,7 @@ class poker extends CI_Controller
                 if(count($temp)==$num){
                     break;
                 }else{
-                    $temp[] = $value;
+                    $temp[] = $key;
                 }
             }
         }
