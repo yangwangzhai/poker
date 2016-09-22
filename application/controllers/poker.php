@@ -22,7 +22,7 @@ class poker extends CI_Controller
 	    }
 
 	    if(!$data['wx_info']['Openid']){
-	        $this->load->view('tip',array('msg'=>'没有获取到用户信息！'));
+	        $this->load->view('tip',array('msg'=>'没有获取到用户信息！！！'));
 	        return;
 	    }
 
@@ -77,68 +77,71 @@ class poker extends CI_Controller
                 echo json_encode($result);
                 exit();
             }else{
-                //控制扑克牌的生成
-                $arr_all = array();
-                $arr_hs = array(1=>"D",2=>"C",3=>"B",4=>"A");
-                $arr_1 = array(1,2,3,4);  //花色
-                $arr_2 = array(1,2,3,4,5,6,7,8,9,10,11,12,13);//点数
-                foreach($arr_2 as $value){
-                    foreach($arr_1 as $val){
-                        $arr_all[] = $value.$val;  //扑克牌全部点数（包括花色）
+                    //控制扑克牌的生成
+                    $arr_all = array();
+                    $arr_hs = array(1=>"D",2=>"C",3=>"B",4=>"A");
+                    $arr_1 = array(1,2,3,4);  //花色
+                    $arr_2 = array(1,2,3,4,5,6,7,8,9,10,11,12,13);//点数
+                    foreach($arr_2 as $value){
+                        foreach($arr_1 as $val){
+                            $arr_all[] = $value.$val;  //扑克牌全部点数（包括花色）
+                        }
                     }
-                }
-                $p_key = array_rand($arr_all);
-                //$p_key = 45;
-                //echo "<br>";
-                /*echo "<pre>";
-                print_r($arr_all);
-                echo "<pre/>";*/
-                //echo $p_key;
-                if($p_key==count($arr_all)-1){
-                    //玩家抽到的是最大的牌
-                    echo "玩家抽到的是最大的牌";exit;
-                }elseif($p_key==0){
-                    //玩家抽到的是最小的牌
-                    echo "玩家抽到的是最小的牌";exit;
-                }else{
-                    $b_key = $this->getProbability($arr_all,$sum,$p_key);
-                }
+                    $p_key = array_rand($arr_all);
+                    //$p_key = 51;
+                    //echo "<br>";
+                    /*echo "<pre>";
+                    print_r($arr_all);
+                    echo "<pre/>";*/
+                    //echo $p_key;
+                    if($p_key==count($arr_all)-1||$p_key==0){
+                        //玩家抽到的是最大的牌或者最小的牌
+                        $arr_all_temp = $arr_all;
+                        unset($arr_all_temp[$p_key]);
+                        $b_key = array_rand($arr_all_temp);
+                        /*echo "<pre>";
+                        print_r($arr_all_temp);
+                        echo "<pre/>";
+                        echo $b_key;echo "<br>";*/
+                    }else{
+                        $b_key = $this->getProbability($arr_all,$sum,$p_key);
+                    }
 
-                $p = $arr_all[$p_key];
-                //echo "玩家的值：".$p;echo "<br>";
-                $p_1 = $arr_hs[$p%10];
-                $p_2 = intval($p/10);
-                //echo "<br>";echo $p_1."||".$p_2;echo "<br>";
-                $b = $arr_all[$b_key];
-                //echo "庄家的值：".$b;echo "<br>";
-                $b_1 = $arr_hs[$b%10];
-                $b_2 = intval($b/10);
-                //echo $b_1."||".$b_2;echo "<br>";
+                    $p = $arr_all[$p_key];
+                    //echo "玩家的值：".$p;echo "<br>";
+                    $p_1 = $arr_hs[$p%10];  //玩家牌的花色
+                    $p_2 = intval($p/10);   //玩家牌的点数
+                    //echo "<br>";echo $p_1."||".$p_2;echo "<br>";
+                    $b = $arr_all[$b_key];
+                    //echo "庄家的值：".$b;echo "<br>";
+                    $b_1 = $arr_hs[$b%10];  //庄家牌的花色
+                    $b_2 = intval($b/10);   //庄家牌的点数
+                    //echo $b_1."||".$b_2;echo "<br>";
 
-                if($b_key>$p_key){
-                    $winner = "baker";
-                }else{
-                    $winner = "player";
-                }
-                //增加或者扣除龙币
-                if($winner=="baker"){
-                    $My_YD = $this->subYD($openid,abs($sum)); //庄家赢，扣除龙币
-                }else{
-                    $My_YD = $this->addYD($openid,abs($sum)); //闲家赢，增加龙币
-                }
+                    if($b_key>$p_key){
+                        $winner = "baker";
+                    }else{
+                        $winner = "player";
+                    }
+                    //增加或者扣除龙币
+                    if($winner=="baker"){
+                        $My_YD = $this->subYD($openid,abs($sum)); //庄家赢，扣除龙币
+                    }else{
+                        $My_YD = $this->addYD($openid,abs($sum)); //闲家赢，增加龙币
+                    }
 
-                //下注信息写入数据库
-                $BetOndata['Openid'] = $openid;
-                $BetOndata['bet'] = $sum;
-                if($winner=="baker"){
-                    $BetOndata['Result'] = -$sum;
-                }else{
-                    $BetOndata['Result'] = $sum;
-                }
-                $BetOndata['AddTime'] = time();
-                $this->db->insert('zy_bet_on',$BetOndata);
+                    //下注信息写入数据库
+                    $BetOndata['Openid'] = $openid;
+                    $BetOndata['bet'] = $sum;
+                    if($winner=="baker"){
+                        $BetOndata['Result'] = -$sum;
+                    }else{
+                        $BetOndata['Result'] = $sum;
+                    }
+                    $BetOndata['AddTime'] = time();
+                    $this->db->insert('zy_bet_on',$BetOndata);
 
-                $result = array('Code'=>0,'Msg'=>'成功','p_1'=>$p_1,'p_2'=>$p_2,'b_1'=>$b_1,'b_2'=>$b_2,'winner'=>$winner,'bets'=>$sum,'My_YD'=>$My_YD);
+                    $result = array('Code'=>0,'Msg'=>'成功','p_1'=>$p_1,'p_2'=>$p_2,'b_1'=>$b_1,'b_2'=>$b_2,'winner'=>$winner,'bets'=>$sum,'My_YD'=>$My_YD);
             }
         }else{
             $result = array('Code'=>-1,'Msg'=>'数据异常');
@@ -169,10 +172,18 @@ class poker extends CI_Controller
             //当下注值大于50且小于等于100时，庄家中奖概率为62%
             $b_rate = 31;
             $p_rate = 19;
-        }elseif($sum>100){
+        }elseif($sum>100&&$sum<=200){
             //当下注值大于100时，庄家中奖概率为65%
             $b_rate = 13;
             $p_rate = 7;
+        }elseif($sum>200&&$sum<=300){
+            //当下注值大于100时，庄家中奖概率为68%
+            $b_rate = 17;
+            $p_rate = 8;
+        }elseif($sum>300){
+            //当下注值大于100时，庄家中奖概率为70%
+            $b_rate = 7;
+            $p_rate = 3;
         }
         //下注值<=20，庄家赢概率65%。生成一个数组，其中有13个是庄家赢的点数，7个是玩家赢的
         if(count($b_arr)>=$b_rate){    //从$b_arr中随机抽取13张牌
@@ -467,7 +478,8 @@ class poker extends CI_Controller
     		return false;
     	}
     	$this->db->set('TotalGold', 'TotalGold+'.$num, FALSE);
-    	$this->db->update('zy_player',array('Openid'=>$openid));
+        $this->db->where(array('Openid'=>$openid));
+    	$this->db->update('zy_player');
     	return $this->getYD($openid);
     }
 
@@ -478,7 +490,8 @@ class poker extends CI_Controller
 			return false;
 		}
 		$this->db->set('TotalGold', 'TotalGold-'.$num, FALSE);
-		$this->db->update('zy_player',array('Openid'=>$openid));
+        $this->db->where(array('Openid'=>$openid));
+		$this->db->update('zy_player');
 		return $this->getYD($openid);
 	}
 

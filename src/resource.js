@@ -10,15 +10,16 @@ var res = {
     s_chips:"res/chips.png",
     s_btn_start:"res/btn_start.png",
     s_bg_poker:"res/bg_poker.png",
-    s_poker_k:"res/poker_k.png",
-    s_poker_a:"res/poker_a.png",
     s_btn_show:"res/btn_show.png",
     s_btn_ready:"res/btn_ready.png",
     s_card_plist:"res/card_plist.plist",
     s_card_png:"res/card_plist.png",
+    s_horn:"res/horn.png",
+    s_stop_horn:"res/stop_horn.png",
 
     s_bg_music : "res/audio/bg_music.mp3",
-    s_yao : "res/audio/yao1.mp3"
+    s_ya : "res/audio/s6.mp3",
+    s_send : "res/audio/send.wav"
 };
 
 var g_resources = [];

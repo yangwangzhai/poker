@@ -18,6 +18,7 @@ var G_ThouchLayer = cc.Layer.extend({
     poker_value2:null,
     player_num:null,
     baker_num:null,
+    bgmusic_flag:null,
 
     ctor: function () {
         // 1. super init first
@@ -25,6 +26,12 @@ var G_ThouchLayer = cc.Layer.extend({
         this.WinSize = cc.winSize;  //获取当前游戏窗口大小
         this.my_YD = wx_info.total_gold;
         this.UI_YD = wx_info.total_gold;
+
+        this.initBgMusic(); //播放背景音乐
+
+        this.initBgMusicBtn();//设置喇叭播放按钮位置
+
+        this.initBgMusicStopBtn();//设置喇叭禁止播放按钮位置
 
         this.initBetOnObj();//初始化押注值：0
 
@@ -46,9 +53,52 @@ var G_ThouchLayer = cc.Layer.extend({
 
         //this.schedule(this.updateShow, 0.5);    //定时函数，每0.5秒执行一次updateShow函数
 
-
-
         return true;
+    },
+
+    //播放背景音乐
+    initBgMusic: function () {
+        cc.audioEngine.playMusic(res.s_bg_music,true);
+    },
+
+    initBgMusicBtn: function () {
+        this.s_hornArea = new cc.MenuItemImage(res.s_horn,res.s_horn,this.BgMusicCallback,this);
+        this.s_hornArea.attr({
+            x:this.s_hornArea.width,
+            y:450
+        });
+        this._s_horn_menu = new cc.Menu(this.s_hornArea);
+        this._s_horn_menu.x=0;
+        this._s_horn_menu.y=0;
+        this.addChild(this._s_horn_menu);
+    },
+
+    initBgMusicStopBtn: function () {
+        this.s_hornStopArea = new cc.MenuItemImage(res.s_stop_horn,res.s_stop_horn,this.BgMusicCallback,this);
+        this.s_hornStopArea.attr({
+            x:this.s_hornStopArea.width,
+            y:450
+        });
+        this._s_hornStop_menu = new cc.Menu(this.s_hornStopArea);
+        this._s_hornStop_menu.x=0;
+        this._s_hornStop_menu.y=0;
+        this.addChild(this._s_hornStop_menu);
+        this._s_hornStop_menu.setVisible(false);
+    },
+
+    BgMusicCallback: function(){
+        if(this.bgmusic_flag){
+            cc.audioEngine.playMusic(res.s_bg_music,true);
+            this._s_hornStop_menu.setVisible(false);
+            this._s_horn_menu.setVisible(true);
+            this.bgmusic_flag = false;
+        }else{
+            cc.audioEngine.stopMusic();
+            this._s_hornStop_menu.setVisible(true);
+            this._s_horn_menu.setVisible(false);
+            this.bgmusic_flag = true;
+        }
+
     },
 
     //初始化押注值：0
@@ -116,6 +166,8 @@ var G_ThouchLayer = cc.Layer.extend({
     },
     //投注之后回调函数：依次累加每次投注的值
     betCallBack: function (sender){
+        var effect_ya = cc.audioEngine.playEffect(res.s_ya,false);
+        //cc.audioEngine.stopEffect(effect_ya);
         if(this.checkYD(this.bet_on_obj.total+sender.bet_num)){
             this.s_chipsArea.setVisible(true);
             this.show_xz.setVisible(true);
@@ -211,6 +263,7 @@ var G_ThouchLayer = cc.Layer.extend({
 
     //发牌动作
     beginCallback:function(){
+        var effect_send = cc.audioEngine.playEffect(res.s_send,false);
         var self=this;
         cc.spriteFrameCache.addSpriteFrames(res.s_card_plist);
         //异步
@@ -226,7 +279,6 @@ var G_ThouchLayer = cc.Layer.extend({
                     if(response.Code == 0){
                         //给闲家发背面牌
                         self.resultAreaHide();
-                        self.resultAreaShow();
                         self.poker_value  = new cc.Sprite(res.s_bg_poker);
                         self.poker_value.attr({
                             x:550,
@@ -248,7 +300,9 @@ var G_ThouchLayer = cc.Layer.extend({
                                 y : self.poker_value.height/2
                             });
                             self.poker_value.addChild(player_poker);
+                            self.resultAreaShow();
                         },0.5);
+
                     }else{
                         alert(response.Msg);
                     }
