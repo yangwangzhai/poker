@@ -9,16 +9,13 @@ var G_ThouchLayer = cc.Layer.extend({
     bet_on_obj: null,   //存放押注对象
     my_YD: null,//我的烟豆(与数据库同步)
     UI_YD: null,//UI显示的烟豆数
-    ZQ_YD: 0,
     show_xz: null,    //游戏底部下注数组
-    show_zq: [],    //游戏底部赚取数组
-    isRun: false,
-    isBetAgain: false,
-    poker_value:null,
-    poker_value2:null,
-    player_num:null,
-    baker_num:null,
+    poker_value:null,//玩家背景牌精灵
+    poker_value2:null,//庄家背景牌精灵
+    player_num:null,//玩家、庄家的牌数（从后台异步获取）
     bgmusic_flag:null,
+    MusicSet:null,
+    EffectsSet:null,
 
     ctor: function () {
         // 1. super init first
@@ -26,12 +23,14 @@ var G_ThouchLayer = cc.Layer.extend({
         this.WinSize = cc.winSize;  //获取当前游戏窗口大小
         this.my_YD = wx_info.total_gold;
         this.UI_YD = wx_info.total_gold;
-
-        this.initBgMusic(); //播放背景音乐
+        this.MusicSet = wx_info.MusicSet;
+        this.EffectsSet = wx_info.EffectsSet;
 
         this.initBgMusicBtn();//设置喇叭播放按钮位置
 
         this.initBgMusicStopBtn();//设置喇叭禁止播放按钮位置
+
+        this.initBgMusic(); //播放背景音乐
 
         this.initBetOnObj();//初始化押注值：0
 
@@ -58,7 +57,14 @@ var G_ThouchLayer = cc.Layer.extend({
 
     //播放背景音乐
     initBgMusic: function () {
-        cc.audioEngine.playMusic(res.s_bg_music,true);
+        if(this.MusicSet){
+            cc.audioEngine.playMusic(res.s_bg_music,true);
+            this._s_horn_menu.setVisible(true);
+        }else{
+            cc.audioEngine.stopMusic();
+            this._s_hornStop_menu.setVisible(true);
+        }
+
     },
 
     initBgMusicBtn: function () {
@@ -71,6 +77,7 @@ var G_ThouchLayer = cc.Layer.extend({
         this._s_horn_menu.x=0;
         this._s_horn_menu.y=0;
         this.addChild(this._s_horn_menu);
+        this._s_horn_menu.setVisible(false);
     },
 
     initBgMusicStopBtn: function () {
@@ -87,17 +94,37 @@ var G_ThouchLayer = cc.Layer.extend({
     },
 
     BgMusicCallback: function(){
-        if(this.bgmusic_flag){
-            cc.audioEngine.playMusic(res.s_bg_music,true);
-            this._s_hornStop_menu.setVisible(false);
-            this._s_horn_menu.setVisible(true);
-            this.bgmusic_flag = false;
-        }else{
+        if(this.MusicSet){
             cc.audioEngine.stopMusic();
             this._s_hornStop_menu.setVisible(true);
             this._s_horn_menu.setVisible(false);
-            this.bgmusic_flag = true;
+            this.MusicSet = 0;
+        }else{
+            cc.audioEngine.playMusic(res.s_bg_music,true);
+            this._s_hornStop_menu.setVisible(false);
+            this._s_horn_menu.setVisible(true);
+            this.MusicSet = 1;
         }
+
+        var xhr = cc.loader.getXMLHttpRequest();
+        xhr.open("POST", "index.php?c=poker&m=set_music");
+        //set Content-type "text/plain;charset=UTF-8" to post plain text
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4) {
+                if (xhr.status >= 200 && xhr.status <= 207) {
+                    var response = eval("("+xhr.responseText+")");//接收服务器返回结果
+                    if(response.Code == 0){
+                        //cc.log(response.MusicSet);
+                    }else{
+                        alert(response.Msg);
+                    }
+                }else {
+                    alert('网络故障，请稍后再试试~');
+                }
+            }
+        };
+        xhr.send("MusicSet="+this.MusicSet+"&Openid="+wx_info.openid);//发送下注信息到服务器
 
     },
 
@@ -342,8 +369,10 @@ var G_ThouchLayer = cc.Layer.extend({
         this.poker_value2.addChild(baker_poker);
         //判断谁赢
         if(this.player_num.winner=='baker'){
+            var effect_baker_win = cc.audioEngine.playEffect(res.s_baker_win,false);
             this.bankerWin();
         }else{
+            var effect_player_win = cc.audioEngine.playEffect(res.s_player_win,false);
             this.playerWin();
         }
         this.s_show_downArea.setVisible(false);

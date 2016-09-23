@@ -19,7 +19,9 @@ var res = {
 
     s_bg_music : "res/audio/bg_music.mp3",
     s_ya : "res/audio/s6.mp3",
-    s_send : "res/audio/send.wav"
+    s_send : "res/audio/send.mp3",
+    s_player_win : "res/audio/player_win.mp3",
+    s_baker_win : "res/audio/baker_win.wav"
 };
 
 var g_resources = [];

@@ -23,7 +23,7 @@
 </head>
 <body style="padding:0; margin: 0; background: #000;">
 <script>
-    var wx_info = {openid:'<?=$wx_info["Openid"]?>',nickname:'<?=$wx_info["NickName"]?>',imgUrl:'<?=$wx_info["HeadImg"]?>',total_gold:<?=$wx_info["TotalGold"]?>,gamekey:'<?=$wx_info["gamekey"]?>'}
+    var wx_info = {openid:'<?=$wx_info["Openid"]?>',nickname:'<?=$wx_info["NickName"]?>',imgUrl:'<?=$wx_info["HeadImg"]?>',total_gold:<?=$wx_info["TotalGold"]?>,gamekey:'<?=$wx_info["gamekey"]?>',MusicSet:<?=$wx_info["MusicSet"]?>,EffectsSet:<?=$wx_info["EffectsSet"]?>}
 </script>
 <script src="res/loading.js"></script>
 <canvas id="gameCanvas" width="640" height="480"></canvas>

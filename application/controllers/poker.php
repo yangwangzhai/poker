@@ -26,10 +26,8 @@ class poker extends CI_Controller
 	        return;
 	    }
 
-
         //获取烟豆信息并跟新数据库
         //$my_YD = $this->getYD($data['wx_info']['Openid']);
-
         if($this->checkUser($data['wx_info']['Openid'])){
             $Udata['UpdateTime'] = time();
             $Udata['TotalGold'] = $this->getYD($data['wx_info']['Openid']);
@@ -43,17 +41,16 @@ class poker extends CI_Controller
             $Udata['UpdateTime'] = time();
             $this->addUser($Udata);
         }
-
         $gamekey = $this->getKey();
-
         //存验证码
 		$this->saveGameKey($data['wx_info']['Openid'],$gamekey);
+        //获取背景音乐、音效设置
+        $ms = $this->getMusicFlag($data['wx_info']['Openid']);
 
+        $data['wx_info']['MusicSet'] = $ms['MusicSet'];
+        $data['wx_info']['EffectsSet'] = $ms['EffectsSet'];
         $data['wx_info']['TotalGold'] = $Udata['TotalGold'];
 		$data['wx_info']['gamekey'] = $gamekey;
-
-
-
 
 		$this->load->view('poker',$data);
 	}
@@ -132,6 +129,9 @@ class poker extends CI_Controller
 
                     //下注信息写入数据库
                     $BetOndata['Openid'] = $openid;
+                    $BetOndata['bet'] = $sum;
+                    $BetOndata['p_poker_face'] = $p_1."_".$p_2;
+                    $BetOndata['b_poker_face'] = $b_1."_".$b_2;
                     $BetOndata['bet'] = $sum;
                     if($winner=="baker"){
                         $BetOndata['Result'] = -$sum;
@@ -444,7 +444,6 @@ class poker extends CI_Controller
 	    if(!$openid){
 	        return false;
 	    }
-
 	    return $this->db->get_where('zy_player',array('Openid'=>$openid))->num_rows();
 	}
 
@@ -470,6 +469,14 @@ class poker extends CI_Controller
         }
         $Pdata = $this->db->get_where('zy_player',array('Openid'=>$openid))->row_array();
         return $Pdata['TotalGold'];
+    }
+
+    private function getMusicFlag($openid) {//获取背景音乐、音效设置
+        if(!$openid){
+            return false;
+        }
+        $Pdata = $this->db->get_where('zy_player',array('Openid'=>$openid))->row_array();
+        return $Pdata;
     }
 
 	//添加烟豆
@@ -573,7 +580,13 @@ class poker extends CI_Controller
         return $result;
     }
 
-
+    public function set_music(){
+        $Udata['MusicSet'] = trim($_POST['MusicSet']);
+        $Openid = trim($_POST['Openid']);
+        $this->updateUser($Udata,array('Openid'=>$Openid));
+        $result = array('Code'=>0,'Msg'=>'成功','MusicSet'=>$Udata['MusicSet']);
+        echo json_encode($result);
+    }
 
 
 
