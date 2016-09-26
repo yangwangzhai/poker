@@ -48,7 +48,8 @@
  */
 
 var AllowMusic = false;
-
+/*var socket = io.connect('ws://192.168.1.217:3000');//h5game.gxziyun.com
+socket.emit('login', {openid:wx_info.openid});*/
 cc.game.onStart = function(){
     if(!cc.sys.isNative && document.getElementById("cocosLoading")) //If referenced loading.js, please remove it
         document.body.removeChild(document.getElementById("cocosLoading"));

@@ -20,11 +20,19 @@ var G_ThouchLayer = cc.Layer.extend({
     ctor: function () {
         // 1. super init first
         this._super();
+        var self = this;
         this.WinSize = cc.winSize;  //获取当前游戏窗口大小
         this.my_YD = wx_info.total_gold;
         this.UI_YD = wx_info.total_gold;
         this.MusicSet = wx_info.MusicSet;
         this.EffectsSet = wx_info.EffectsSet;
+
+        //喇叭公告
+        setXlbText(this);
+        this.schedule(function noting() {
+                setXlbText(self);
+            }, 20
+        );
 
         this.initBgMusicBtn();//设置喇叭播放按钮位置
 

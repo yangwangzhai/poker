@@ -5,6 +5,10 @@
 class poker extends CI_Controller
 {
 
+    public $ActiveID = 0;
+    public $ChannelID = 1;
+    public $RoomID = 6;
+
 	function index() {
 	    $data = array();
 	    if(isset($_GET['test'])){
@@ -587,6 +591,50 @@ class poker extends CI_Controller
         $result = array('Code'=>0,'Msg'=>'成功','MusicSet'=>$Udata['MusicSet']);
         echo json_encode($result);
     }
+
+    //喇叭公告
+    function get_xlb(){
+        $this->game_sign_sql = addslashes("  ActiveID=$this->ActiveID AND ChannelID=$this->ChannelID AND RoomID=$this->RoomID");
+        $xlb_ids = $this->input->get('ids');
+        // $where['ActiveID'] = $this->ActiveID;
+        $where['ChannelID'] = $this->ChannelID;
+        $where['RoomID'] = $this->RoomID;
+        $this->db->order_by("addtime", "desc");
+        $query = $this->db->get_where('zy_game_xlb', $where, 5);
+        $result = $query->result_array();
+
+        $ids = array();
+        $xlb_text = '';
+        foreach($result as $r){
+            $ids[] = $r['id'];
+            $xlb_text .= $r['content'] ;
+        }
+        $ids_in = implode(',',$ids );
+        $diff_time = time() - 60*2;
+        if( $result && $result[0]['addtime'] <  $diff_time){
+            $this->db->query("update zy_game_xlb set addtime =0  where  $this->game_sign_sql");
+            $time = time();
+            $this->db->query("update zy_game_xlb set addtime =$time  where  $this->game_sign_sql and id not in($ids_in)  ORDER BY RAND() LIMIT 5 ");
+
+            $this->db->order_by("addtime", "desc");
+            $query = $this->db->get_where('zy_game_xlb', $where, 5);
+            $result = $query->result_array();
+            $xlb_text = '';
+            $ids = array();
+            foreach($result as $r){
+                $ids[] = $r['id'];
+                $xlb_text .= $r['content'];
+            }
+            $ids_in = implode(',',$ids );
+        }
+        $data['is_update'] = 0;
+        if($xlb_ids != $ids_in) $data['is_update'] = 1;
+        $data['ids'] = $ids_in;
+        $data['content'] = $xlb_text;
+        echo json_encode($data);
+
+    }
+
 
 
 

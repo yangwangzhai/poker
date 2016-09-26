@@ -25,6 +25,7 @@
 <script>
     var wx_info = {openid:'<?=$wx_info["Openid"]?>',nickname:'<?=$wx_info["NickName"]?>',imgUrl:'<?=$wx_info["HeadImg"]?>',total_gold:<?=$wx_info["TotalGold"]?>,gamekey:'<?=$wx_info["gamekey"]?>',MusicSet:<?=$wx_info["MusicSet"]?>,EffectsSet:<?=$wx_info["EffectsSet"]?>}
 </script>
+<!--<script src="http://192.168.1.217:3000/socket.io/socket.io.js"></script>-->
 <script src="res/loading.js"></script>
 <canvas id="gameCanvas" width="640" height="480"></canvas>
 <script src="frameworks/cocos2d-html5/CCBoot.js"></script>

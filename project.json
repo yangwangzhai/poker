@@ -14,7 +14,7 @@
     "jsList" : [
         "src/resource.js",
         "src/app.js",
-
+        "src/common.js",
         "src/Game/GameScene.js",
         "src/Game/G_BackGroundLayer.js",
         "src/Game/G_ThouchLayer.js"
